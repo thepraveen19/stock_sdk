@@ -8,9 +8,13 @@ config.py
 credentials.py
 
 # Ignore db config
-postgres_config.py
+database/postgres_config.py
 
 # Ignore db folder
 postgres_stock_db/
 
-# add more
+# cache
+*.pyc
+
+*.txt
+!requirements.txt
