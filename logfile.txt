@@ -1,6 +1,0 @@
-2023-03-20 02:06:40,132 - logger - INFO - this is inside loginfyresss
-2023-03-20 02:06:40,132 - logger - INFO - This is an info message
-2023-03-20 02:06:40,132 - logger - WARNING - This is a warning message
-2023-03-20 02:06:40,132 - logger - ERROR - This is an error message
-2023-03-25 17:40:07,877 - logger - INFO - this is inside loginfyresss
-2023-03-25 17:40:21,452 - logger - INFO - this is inside loginfyresss
