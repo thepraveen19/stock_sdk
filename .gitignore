@@ -1,0 +1,14 @@
+# Ignore log files
+*.log
+
+# Ignore the config file
+config.py
+
+# Ignore the credentials file
+credentials.py
+
+# Ignore db config
+postgres_config.py
+
+# Ignore db folder
+postgres_stock_db/
