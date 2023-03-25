@@ -12,3 +12,5 @@ postgres_config.py
 
 # Ignore db folder
 postgres_stock_db/
+
+# add more
