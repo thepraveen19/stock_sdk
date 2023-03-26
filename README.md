@@ -1,5 +1,5 @@
 my_project/
-├── postgres_stock_db
+├── postgres_stock_db/
 ├── credentials.py
 ├── config.py
 ├── api/
@@ -21,7 +21,8 @@ my_project/
 ├── database/
 │   ├── __init__.py
 │   ├── models.py
-│   └── database.py
+│   ├── database.py
+│   └── crud.py
 ├── utils/
 │   ├── __init__.py
 │   └── helpers.py
@@ -29,6 +30,7 @@ my_project/
 ├── logger.py
 ├── README.md
 └── requirements.txt
+
 
 
 
@@ -42,17 +44,18 @@ Project Structure
 
 The project structure is organized as follows:
 
+postgres_stock_db/ contains files related to a PostgreSQL database for storing stock data.
 
 credentials.py: This file will store the login credentials like usernames, passwords, and other secrets.
 
 config.py: This file will store the API endpoint URLs.
 
-api/: This folder will contain the API-related code.
+api/: contains code related to the project's API, including defining API endpoints and an API client for accessing external services.
 __init__.py: This file is needed to treat api directory as a package.
 endpoints.py: This file will contain the code to connect with the API, fetch data and return it to the main program.
 api_client.py: This file will contain the code to make api calls
 
-analysis/: This folder will contain the code for analyzing the data.
+analysis/: contains code related to analyzing stock data, including various prediction algorithms.
 __init__.py: This file is needed to treat analysis directory as a package.
 analysis.py: This file will contain the code to analyze the data fetched from the API and create a new table with the analyzed
 data.
@@ -64,11 +67,11 @@ algorithm2.py: This file will contain the code for the second prediction algorit
 algorithm3.py: This file will contain the code for the third prediction algorithm.
 ...: This folder can contain any number of prediction algorithm files.
 
-trading/: This folder will contain the code for buying and selling stocks.
+trading/: contains code related to the project's trading logic.
 __init__.py: This file is needed to treat trading directory as a package.
 trading.py: This file will contain the code for buying and selling stocks using different strategies.
 
-database/: This folder will contain the code for connecting to the database and storing the data.
+database/: contains code for interacting with the project's database, including defining models and CRUD (create, read, update, delete) operations.
 __init__.py: This file is needed to treat database directory as a package.
 models.py: This file will contain the SQLAlchemy model classes for the database tables.
 database.py: This file will contain the code for connecting to the database, creating the tables, and inserting data into them.
