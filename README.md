@@ -32,9 +32,6 @@ my_project/
 └── requirements.txt
 
 
-
-
-
 Stock Trading System
 
 This is a stock trading system that uses an API to fetch data for various stocks, performs analysis on the data, 
