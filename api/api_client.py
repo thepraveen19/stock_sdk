@@ -13,8 +13,8 @@ from fyers_api import fyersModel
 from fyers_api import accessToken
 from logger import logger
 
-class api_calls:
-    def __init__(self) -> None:
+class ApiCalls:
+    def __init__(self):
         pass
         
     def send_login_otp(self, fy_id, app_id):
@@ -110,4 +110,14 @@ class api_calls:
         access_token = self.verify_pin_create_access_token(request_key_2, session)
         fyrs_client = self.create_fyrs_client(access_token)
         return fyrs_client
+
+class EquityData:
+    def __init__(self, api_obj):
+        self.api_obj = api_obj
+        
+    def get_equity_data(self, symbol):
+       data = {"symbols":symbol}
+       response = self.api_obj.quotes(data=data)
+       return response
+
 

@@ -72,6 +72,7 @@ database/: contains code for interacting with the project's database, including 
 __init__.py: This file is needed to treat database directory as a package.
 models.py: This file will contain the SQLAlchemy model classes for the database tables.
 database.py: This file will contain the code for connecting to the database, creating the tables, and inserting data into them.
+crud.py: This file will contain the code for performing CRUD operations on the database, such as creating new records, retrieving existing records, updating records, and deleting records. This file will typically use the SQLAlchemy ORM (Object-Relational Mapping) to interact with the database. The CRUD operations implemented in this file will be used by other parts of the project to manage data in the database.
 
 utils/: This folder will contain utility functions that can be used across the project.
 __init__.py: This file is needed to treat utils directory as a package.
