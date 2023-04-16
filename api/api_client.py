@@ -12,6 +12,8 @@ import sys
 from fyers_api import fyersModel
 from fyers_api import accessToken
 from logger import logger
+import pandas as pd
+from datetime import datetime
 
 class ApiCalls:
     def __init__(self):
@@ -114,10 +116,31 @@ class ApiCalls:
 class EquityData:
     def __init__(self, api_obj):
         self.api_obj = api_obj
+        self.response = None
         
     def get_equity_data(self, symbol):
-       data = {"symbols":symbol}
-       response = self.api_obj.quotes(data=data)
-       return response
+        data = {"symbols":symbol}
+        self.response = self.api_obj.quotes(data=data)
+        return self.response
+    
+    def create_stock_data_df(self):
+        data = []
+        for stock in self.response['d']:
+            stock_data = {}
+            stock_data['id'] = stock['v']['fyToken']
+            timestamp = datetime.fromtimestamp(stock['v']['tt'])
+            stock_data['date'] = timestamp.strftime('%Y-%m-%d')
+            stock_data['time'] = timestamp.strftime('%H:%M:%S')
+            stock_data['stock_id'] = stock['n']
+            stock_data['open_price'] = stock['v']['open_price']
+            stock_data['high_price'] = stock['v']['high_price']
+            stock_data['low_price'] = stock['v']['low_price']
+            stock_data['close_price'] = stock['v']['lp']
+            data.append(stock_data)
+
+        df = pd.DataFrame(data, columns=['id', 'date', 'time', 'stock_id', 'open_price', 'high_price', 'low_price', 'close_price'])
+        return df
+    
+
 
 

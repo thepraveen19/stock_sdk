@@ -26,6 +26,9 @@ my_project/
 ├── utils/
 │   ├── __init__.py
 │   └── helpers.py
+├── task_scripts/
+│   ├── __init__.py
+│   └── populate_stocks.py
 ├── main.py
 ├── logger.py
 ├── README.md
