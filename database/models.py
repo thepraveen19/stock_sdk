@@ -61,3 +61,4 @@ class Prediction(Base):
 
 # Create the tables
 Base.metadata.create_all(engine)
+

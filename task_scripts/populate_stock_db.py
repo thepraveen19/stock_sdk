@@ -4,24 +4,6 @@ from database.database import Session
 from database.models import Stock
 import time
 
-# class StockLoader:
-#     def __init__(self):
-#         self.session = Session()
-        
-#     def load_stocks(self, stock_data):
-#         # iterate through each dictionary in the stock_data list and create a new Stock object for each
-#         for data in stock_data:
-#             stock = Stock(name=data['name'], symbol=data['symbol'], description=data['description'])
-#             self.session.add(stock)
-
-#         # commit the changes to the database
-#         self.session.commit()
-
-# loader = StockLoader()
-# stock_data = [{'name': 'Reliance Industries Ltd.', 'symbol': 'RELIANCE.NS', 'description': 'Diversified conglomerate in India'},              {'name': 'HDFC Bank Ltd.', 'symbol': 'HDFCBANK.NS', 'description': 'Indian banking and financial services company'},              {'name': 'Infosys Ltd.', 'symbol': 'INFY.NS', 'description': 'Indian multinational information technology company'}]
-# loader.load_stocks(stock_data)
-
-
 from database.database import Session
 from database.models import Stock
 
@@ -54,6 +36,9 @@ deleter = StockDeleter()
 
 # Example usage with a DataFrame
 import pandas as pd
+# Get a csv file from which the list of stocks can be retrived in the df.
+# this can be loaded as below. As of now in the next line stock_data is loading a few stock names in the stocks table.
+# replace stock_data = pd.dataframe..... by pd.read csv.. the last line remains untouched.
 stock_data = pd.DataFrame({
     'name': ['Reliance Industries Ltd.', 'HDFC Bank Ltd.', 'Infosys Ltd.'],
     'symbol': ['RELIANCE.NS', 'HDFCBANK.EQ', 'INFY.NS'],
