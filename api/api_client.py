@@ -14,7 +14,9 @@ from fyers_api import accessToken
 from logger import logger
 import pandas as pd
 from datetime import datetime
-import uuid
+from database.database import Session
+from database.models import HistoricalData, Stock
+import time
 
 class ApiCalls:
     def __init__(self):
@@ -113,14 +115,6 @@ class ApiCalls:
         access_token = self.verify_pin_create_access_token(request_key_2, session)
         fyrs_client = self.create_fyrs_client(access_token)
         return fyrs_client
-    
-from datetime import datetime
-from database.database import Session
-from database.models import HistoricalData, Stock
-from datetime import datetime
-import time
-import pandas as pd
-
 
 class EquityData:
     def __init__(self, api_obj):
@@ -153,8 +147,9 @@ class EquityData:
         self.session.commit()
         return data
 
-    def create_historical_data_continuous(self, symbols, interval_sec):
+    def create_historical_data_continuous(self, interval_sec):
         while True:
+            symbols = [s.symbol for s in self.session.query(Stock)]
             for symbol in symbols:
                 data = self.create_historical_data(symbol)
                 logger.info(f"Inserted {len(data)} rows into the historical_data table for {symbol}")
@@ -174,5 +169,9 @@ class EquityData:
         df = pd.DataFrame([d.__dict__ for d in data])
         df = df.drop('_sa_instance_state', axis=1)
         return df
+
+
+
+
     
 
