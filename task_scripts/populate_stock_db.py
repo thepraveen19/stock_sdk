@@ -39,10 +39,12 @@ import pandas as pd
 # Get a csv file from which the list of stocks can be retrived in the df.
 # this can be loaded as below. As of now in the next line stock_data is loading a few stock names in the stocks table.
 # replace stock_data = pd.dataframe..... by pd.read csv.. the last line remains untouched.
-stock_data = pd.DataFrame({
-    'name': ['Reliance Industries Ltd.', 'HDFC Bank Ltd.', 'Infosys Ltd.'],
-    'symbol': ['RELIANCE.NS', 'HDFCBANK.EQ', 'INFY.NS'],
-    'description': ['Diversified conglomerate in India', 'Indian banking and financial services company', 'Indian multinational information technology company']
-})
+# stock_data = pd.DataFrame({
+#     'name': ['Reliance Industries Ltd.', 'HDFC Bank Ltd.', 'Infosys Ltd.'],
+#     'symbol': ['RELIANCE.NS', 'HDFCBANK.EQ', 'INFY.NS'],
+#     'description': ['Diversified conglomerate in India', 'Indian banking and financial services company', 'Indian multinational information technology company']
+# })
+
+stock_data = pd.read_csv(r"/Users/praveenkadam/Documents/Algorithmic_trading/stock_sdk/fo_mktlots.csv")
 loader.load_stocks(stock_data)
 

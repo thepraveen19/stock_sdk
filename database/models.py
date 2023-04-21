@@ -1,8 +1,10 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Date, Time, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 import os
 from database.database import engine, Session
+
+
 
 # Create a base class to be inherited by all models
 Base = declarative_base()
@@ -11,14 +13,14 @@ Base = declarative_base()
 class Exchange(Base):
     __tablename__ = 'exchanges'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     name = Column(String)
 
 # Define the Stock model
 class Stock(Base):
     __tablename__ = 'stocks'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     name = Column(String)
     symbol = Column(String)
     description = Column(String)
@@ -27,7 +29,7 @@ class Stock(Base):
 class Algorithm(Base):
     __tablename__ = 'algorithms'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     name = Column(String)
     description = Column(String)
     parameters = Column(String)
@@ -36,8 +38,9 @@ class Algorithm(Base):
 class HistoricalData(Base):
     __tablename__ = 'historical_data'
 
-    id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime)
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    date = Column(Date)
+    time = Column(Time)
     stock_id = Column(Integer, ForeignKey('stocks.id'))
     open_price = Column(Float)
     high_price = Column(Float)
@@ -50,8 +53,9 @@ class HistoricalData(Base):
 class Prediction(Base):
     __tablename__ = 'predictions'
 
-    id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime)
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    date = Column(Date)
+    time = Column(Time)
     stock_id = Column(Integer, ForeignKey('stocks.id'))
     algorithm_id = Column(Integer, ForeignKey('algorithms.id'))
     predicted_price = Column(Float)
@@ -61,4 +65,3 @@ class Prediction(Base):
 
 # Create the tables
 Base.metadata.create_all(engine)
-

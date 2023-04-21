@@ -14,6 +14,7 @@ from fyers_api import accessToken
 from logger import logger
 import pandas as pd
 from datetime import datetime
+import uuid
 
 class ApiCalls:
     def __init__(self):
@@ -112,39 +113,14 @@ class ApiCalls:
         access_token = self.verify_pin_create_access_token(request_key_2, session)
         fyrs_client = self.create_fyrs_client(access_token)
         return fyrs_client
-
-# class EquityData:
-#     def __init__(self, api_obj):
-#         self.api_obj = api_obj
-#         self.response = None
-        
-#     def get_equity_data(self, symbol):
-#         data = {"symbols":symbol}
-#         self.response = self.api_obj.quotes(data=data)
-#         return self.response
-    
-#     def create_stock_data_df(self):
-#         data = []
-#         for stock in self.response['d']:
-#             stock_data = {}
-#             stock_data['id'] = stock['v']['fyToken']
-#             timestamp = datetime.fromtimestamp(stock['v']['tt'])
-#             stock_data['date'] = timestamp.strftime('%Y-%m-%d')
-#             stock_data['time'] = timestamp.strftime('%H:%M:%S')
-#             stock_data['stock_id'] = stock['n']
-#             stock_data['open_price'] = stock['v']['open_price']
-#             stock_data['high_price'] = stock['v']['high_price']
-#             stock_data['low_price'] = stock['v']['low_price']
-#             stock_data['close_price'] = stock['v']['lp']
-#             data.append(stock_data)
-
-#         df = pd.DataFrame(data, columns=['id', 'date', 'time', 'stock_id', 'open_price', 'high_price', 'low_price', 'close_price'])
-#         return df
     
 from datetime import datetime
 from database.database import Session
-from database.models import HistoricalData
-from api_client import APIClient
+from database.models import HistoricalData, Stock
+from datetime import datetime
+import time
+import pandas as pd
+
 
 class EquityData:
     def __init__(self, api_obj):
@@ -155,38 +131,48 @@ class EquityData:
         data = {"symbols":symbol}
         response = self.api_obj.quotes(data=data)
         return response
-    
-    def create_historical_data(self, symbol):
+
+    def create_historical_data(self, symbol, stock_id=None):
         response = self.get_equity_data(symbol)
         data = []
-        for stock in response['d']:
-            stock_data = HistoricalData(
-                id=stock['v']['fyToken'],
-                date=datetime.fromtimestamp(stock['v']['tt']).strftime('%Y-%m-%d'),
-                time=datetime.fromtimestamp(stock['v']['tt']).strftime('%H:%M:%S'),
-                stock_id=stock['n'],
-                open_price=stock['v']['open_price'],
-                high_price=stock['v']['high_price'],
-                low_price=stock['v']['low_price'],
-                close_price=stock['v']['lp']
+        stock = self.session.query(Stock).filter_by(symbol=symbol).one()
+        for stock_data in response['d']:
+            historical_data = HistoricalData(
+                date=datetime.fromtimestamp(stock_data['v']['tt']).strftime('%Y-%m-%d'),
+                time=datetime.fromtimestamp(stock_data['v']['tt']).strftime('%H:%M:%S'),
+                open_price=stock_data['v']['open_price'],
+                high_price=stock_data['v']['high_price'],
+                low_price=stock_data['v']['low_price'],
+                close_price=stock_data['v']['lp'],
+                stock=stock
             )
-            data.append(stock_data)
-            self.session.add(stock_data)
-
+            if stock_id is not None:
+                historical_data.stock_id = stock_id
+            data.append(historical_data)
+            self.session.add(historical_data)
         self.session.commit()
         return data
 
-    def create_historical_data_continuous(self, symbol, interval_sec):
+    def create_historical_data_continuous(self, symbols, interval_sec):
         while True:
-            data = self.create_historical_data(symbol)
-            print(f"Inserted {len(data)} rows into the historical_data table")
+            for symbol in symbols:
+                data = self.create_historical_data(symbol)
+                logger.info(f"Inserted {len(data)} rows into the historical_data table for {symbol}")
             time.sleep(interval_sec)
 
-    # The bewlo method is intended to be used to fetch data from the historical_data table.
+    # The below method is intended to be used to fetch data from the historical_data table.
     # Example: The ML algorithms methods can fetch data from historical table for testing    
-    def get_historical_data(self, symbol):
-        data = self.session.query(HistoricalData).filter_by(stock_id=symbol).all()
-        return data
+    # def get_historical_data(self, symbol):
+    #     data = self.session.query(HistoricalData).filter_by(stock_id=symbol).all()
+    #     return data
 
-
+    def get_historical_data(self, symbol, start_time, end_time):
+        data = self.session.query(HistoricalData).filter(
+            HistoricalData.stock_id == symbol,
+            HistoricalData.date.between(start_time, end_time)
+        ).all()
+        df = pd.DataFrame([d.__dict__ for d in data])
+        df = df.drop('_sa_instance_state', axis=1)
+        return df
+    
 
