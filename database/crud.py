@@ -1,6 +1,7 @@
-from sqlalchemy.orm import Session
-from models import Exchange, Stock, Algorithm, HistoricalData, Prediction
+# from sqlalchemy.orm import Session
+from database.models import Exchange, Stock, Algorithm, HistoricalData, Prediction
 from datetime import datetime
+from database.database import Session
 
 
 class ExchangeCRUD:
@@ -81,22 +82,15 @@ class AlgorithmCRUD:
         self.session.query(Algorithm).filter(Algorithm.id == algorithm_id).delete()
         self.session.commit()
 
-
 class HistoricalDataCRUD:
     def __init__(self):
         self.session = Session()
 
-    def create_historical_data(self, timestamp: datetime, stock_id: int, open_price: float, high_price: float,
-                               low_price: float, close_price: float, volume: float) -> HistoricalData:
-        historical_data = HistoricalData(timestamp=timestamp, stock_id=stock_id, open_price=open_price,
-                                          high_price=high_price, low_price=low_price, close_price=close_price,
-                                          volume=volume)
-        self.session.add(historical_data)
-        self.session.commit()
-        return historical_data
-
-    def read_historical_data(self, historical_data_id: int) -> HistoricalData:
-        historical_data = self.session.query(HistoricalData).filter(HistoricalData.id == historical_data_id).first()
+    def read_historical_data(self, symbol: str = None):
+        if symbol:
+            historical_data = self.session.query(HistoricalData).join(Stock).filter(Stock.symbol == symbol).all()
+        else:
+            historical_data = self.session.query(HistoricalData).all()
         return historical_data
 
     def update_historical_data(self, historical_data_id: int, timestamp: datetime = None, stock_id: int = None,
@@ -132,5 +126,3 @@ class HistoricalDataCRUD:
         historical_data = self.session.query(HistoricalData).filter(HistoricalData.id == historical_data_id).first()
         self.session.delete(historical_data)
         self.session.commit()
-
-

@@ -16,7 +16,7 @@ my_equity_data = EquityData(fyrs_client)
 # response = my_equity_data.get_equity_data("NSE:SBIN-EQ") not required taken care of in line 19(my_equity_data.create_historical_data_continuous("NSE:SBIN-EQ", 5))
 # create historical data for the symbol
 # my_equity_data.create_historical_data(interval is in seconds)
-my_equity_data.create_historical_data_continuous(5)
+my_equity_data.create_historical_data_continuous(10)
 
 
 
