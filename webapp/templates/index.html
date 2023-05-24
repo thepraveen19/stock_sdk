@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QuantGPT</title>
+    <style>
+        .chat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #e5e5e5;
+            border-radius: 5px;
+        }
+
+        .user-message {
+            text-align: right;
+            background-color: #b3d6ff;
+        }
+
+        .bot-message {
+            text-align: left;
+            background-color: #f5f5f5;
+        }
+
+        .input-container {
+            margin-top: 10px;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-message bot-message">
+            <p>Welcome to QuantGPT! How can I assist you today?</p>
+        </div>
+        <div id="message-container"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your message...">
+        </div>
+    </div>
+
+    <script>
+        const messageContainer = document.getElementById('message-container');
+        const userInput = document.getElementById('user-input');
+
+        function addUserMessage(message) {
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('chat-message', 'user-message');
+            userMessage.innerHTML = `<p>${message}</p>`;
+            messageContainer.appendChild(userMessage);
+        }
+
+        function addBotMessage(message) {
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('chat-message', 'bot-message');
+            botMessage.innerHTML = `<p>${message}</p>`;
+            messageContainer.appendChild(botMessage);
+        }
+
+        function processUserInput() {
+            const userMessage = userInput.value;
+            addUserMessage(userMessage);
+            userInput.value = '';
+
+            // Send the user message to the server and receive a response
+            // You can use JavaScript's Fetch API or AJAX to make an API call to your server and handle the response
+
+            // Example code for simulating a bot response
+            setTimeout(function() {
+                const botResponse = 'This is a sample bot response.';
+                addBotMessage(botResponse);
+            }, 500);
+        }
+
+        userInput.addEventListener('keydown', function(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                processUserInput();
+            }
+        });
+    </script>
+</body>
+</html>

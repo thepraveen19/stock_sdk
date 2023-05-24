@@ -134,10 +134,10 @@ class EquityData:
             historical_data = HistoricalData(
                 date=datetime.fromtimestamp(stock_data['v']['tt']).strftime('%Y-%m-%d'),
                 time=datetime.fromtimestamp(stock_data['v']['tt']).strftime('%H:%M:%S'),
-                open_price=stock_data['v']['open_price'],
-                high_price=stock_data['v']['high_price'],
-                low_price=stock_data['v']['low_price'],
-                close_price=stock_data['v']['lp'],
+                open=stock_data['v']['open_price'],
+                high=stock_data['v']['high_price'],
+                low=stock_data['v']['low_price'],
+                close=stock_data['v']['lp'],
                 stock=stock
             )
             if stock_id is not None:
