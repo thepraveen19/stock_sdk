@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
-from database.postgres_config import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+from stock_sdk.database.postgres_config import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
 
 # Construct the path to the database
 project_dir = os.getcwd()  # get the current working directory

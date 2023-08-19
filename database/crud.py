@@ -1,7 +1,7 @@
 # from sqlalchemy.orm import Session
-from database.models import Exchange, Stock, Algorithm, HistoricalData, Prediction
+from stock_sdk.database.models import Exchange, Stock, Algorithm, HistoricalData, Prediction
 from datetime import datetime
-from database.database import Session
+from stock_sdk.database.database import Session
 
 
 class ExchangeCRUD:

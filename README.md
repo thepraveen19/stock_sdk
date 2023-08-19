@@ -1,4 +1,4 @@
-my_project/
+STOCK_SDK/
 ├── postgres_stock_db/
 ├── credentials.py
 ├── config.py

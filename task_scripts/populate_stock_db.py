@@ -1,11 +1,11 @@
 import sys
 sys.path.append('/Users/praveenkadam/Documents/Algorithmic_trading/stock_sdk')
-from database.database import Session
-from database.models import Stock
+from stock_sdk.database.database import Session
+from stock_sdk.database.models import Stock
 import time
 
-from database.database import Session
-from database.models import Stock
+from stock_sdk.database.database import Session
+from stock_sdk.database.models import Stock
 
 class StockLoader:
     def __init__(self):

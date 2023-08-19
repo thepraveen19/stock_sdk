@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QuantGPT</title>
+    <title>X-Bot</title>
     <style>
         .chat-container {
             max-width: 600px;
@@ -43,7 +43,7 @@
 <body>
     <div class="chat-container">
         <div class="chat-message bot-message">
-            <p>Welcome to QuantGPT! How can I assist you today?</p>
+            <p>Welcome to X-bot! How can I assist you today?</p>
         </div>
         <div id="message-container"></div>
         <div class="input-container">
@@ -55,13 +55,6 @@
         const messageContainer = document.getElementById('message-container');
         const userInput = document.getElementById('user-input');
 
-        function addUserMessage(message) {
-            const userMessage = document.createElement('div');
-            userMessage.classList.add('chat-message', 'user-message');
-            userMessage.innerHTML = `<p>${message}</p>`;
-            messageContainer.appendChild(userMessage);
-        }
-
         function addBotMessage(message) {
             const botMessage = document.createElement('div');
             botMessage.classList.add('chat-message', 'bot-message');
@@ -69,19 +62,30 @@
             messageContainer.appendChild(botMessage);
         }
 
+        function addUserMessage(message) {
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('chat-message', 'user-message');
+            userMessage.innerHTML = `<p>${message}</p>`;
+            messageContainer.appendChild(userMessage);
+        }
+
         function processUserInput() {
-            const userMessage = userInput.value;
+            const userMessage = userInput.value.trim();
+            if (userMessage === '') {
+                return;
+            }
+
+            userInput.disabled = true;
+
             addUserMessage(userMessage);
-            userInput.value = '';
 
-            // Send the user message to the server and receive a response
-            // You can use JavaScript's Fetch API or AJAX to make an API call to your server and handle the response
-
-            // Example code for simulating a bot response
-            setTimeout(function() {
-                const botResponse = 'This is a sample bot response.';
+            setTimeout(() => {
+                const botResponse = 'Backtesting results: As per the cross over strategy, the SBI stock gives a return of 12.2% per annum for Intraday implementation. \n Would you like to deaploy this strategy? ';
                 addBotMessage(botResponse);
-            }, 500);
+                userInput.disabled = false;
+                userInput.value = '';
+            }, 2000); // 2-second delay
+
         }
 
         userInput.addEventListener('keydown', function(event) {

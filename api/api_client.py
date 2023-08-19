@@ -1,7 +1,14 @@
-from api import *
-from api.endpoints import *
-from config import *
-from credentials import *
+import os
+import sys
+
+# Add the desired path to the sys.path list
+desired_path = "/Users/praveenkadam/Documents/Algorithmic_trading 2/temp_env/lib/python3.11/site-packages"
+sys.path.append(desired_path)
+
+from stock_sdk.api import *
+from stock_sdk.api.endpoints import *
+from stock_sdk.config import *
+from stock_sdk.credentials import *
 import requests
 import json
 import time
@@ -9,14 +16,15 @@ import pyotp
 import os
 from urllib.parse import parse_qs, urlparse
 import sys
-from fyers_api import fyersModel
-from fyers_api import accessToken
-from logger import logger
+from fyers_apiv3 import fyersModel
+from stock_sdk.logger import logger
 import pandas as pd
-from datetime import datetime
-from database.database import Session
-from database.models import HistoricalData, Stock
+import datetime
+from stock_sdk.database.database import Session
+from stock_sdk.database.models import HistoricalData, Stock
 import time
+from fyers_apiv3.FyersWebsocket import data_ws as ws
+import pytz
 
 class ApiCalls:
     def __init__(self):
@@ -47,7 +55,7 @@ class ApiCalls:
             return [error, e]
         
     def create_session(self):
-        session = accessToken.SessionModel(client_id=client_id, secret_key=secret_key, redirect_uri=redirect_uri,
+        session = fyersModel.SessionModel(client_id=client_id, secret_key=secret_key, redirect_uri=redirect_uri,
                                            response_type='code', grant_type='authorization_code')
         return session
     
@@ -102,6 +110,7 @@ class ApiCalls:
         session.set_token(auth_code)
         response = session.generate_token()
         access_token = response["access_token"]
+        print(access_token)
         return access_token
 
     def create_fyrs_client(self, access_token):
@@ -114,64 +123,168 @@ class ApiCalls:
         request_key_2 = self.get_access_token(request_key)
         access_token = self.verify_pin_create_access_token(request_key_2, session)
         fyrs_client = self.create_fyrs_client(access_token)
-        return fyrs_client
+        return fyrs_client, access_token
 
-class EquityData:
-    def __init__(self, api_obj):
-        self.api_obj = api_obj
+class FyersSocketConnection:
+    def __init__(self, access_token, symbols, message_callback): 
+        self.access_token = access_token
+        self.symbols = symbols
+        self.fyers_socket = None
+        self.message_callback = message_callback
+
+    def setup_socket(self):
+        def on_message(message):
+            self.message_callback(message)
+            # print("Response:", message)
+
+        def on_error(message):
+            print("Error:", message)
+            # Your on_error logic here
+
+        def on_close(message):
+            print("Connection closed:", message)
+            # Your on_close logic here
+
+        def on_open():
+            data_type = "SymbolUpdate"
+            self.fyers_socket.subscribe(symbols=self.symbols, data_type=data_type)
+            self.fyers_socket.keep_running()
+
+        self.fyers_socket = ws.FyersDataSocket(
+            access_token=self.access_token,
+            on_connect=on_open,
+            on_close=on_close,
+            on_error=on_error,
+            on_message=on_message
+        )
+   
+    def connect(self):
+        self.fyers_socket.connect()
+
+class SymbolData:
+    def __init__(self, access_token):
+        self.access_token = access_token
         self.session = Session()
+        self.symbols = [s.symbol for s in self.session.query(Stock)]
+        self.fyers_socket_connection = FyersSocketConnection(self.access_token, self.symbols, self.message_handler)
+        self.market_start_time = market_start_time
+        self.market_end_time = market_end_time
+        self.timezone = pytz.timezone(time_zone)
+      
 
-    def get_equity_data(self, symbol):
-        data = {"symbols":symbol}
-        response = self.api_obj.quotes(data=data)
-        return response
+    def create_historical_data_continuous(self):
+        current_datetime = datetime.datetime.now(self.timezone)
+        print("current_datetime:", current_datetime)
+        market_start_datetime = datetime.datetime.combine(current_datetime.date(), datetime.time(*self.market_start_time), tzinfo=self.timezone)
+        print("market_start_datetime: ", market_start_datetime)
+        market_end_datetime = datetime.datetime.combine(current_datetime.date(), datetime.time(*self.market_end_time), tzinfo=self.timezone)
+        print("market_end_datetime: ", market_end_datetime)
+        # if market_start_datetime <= current_datetime <= market_end_datetime:
+        if True:
+            self.fyers_socket_connection.setup_socket()
+            self.fyers_socket_connection.connect()
+        else:
+            print("Outside market hours")
 
-    def create_historical_data(self, symbol, stock_id=None):
-        response = self.get_equity_data(symbol)
-        data = []
-        stock = self.session.query(Stock).filter_by(symbol=symbol).one()
-        for stock_data in response['d']:
-            historical_data = HistoricalData(
-                date=datetime.fromtimestamp(stock_data['v']['tt']).strftime('%Y-%m-%d'),
-                time=datetime.fromtimestamp(stock_data['v']['tt']).strftime('%H:%M:%S'),
-                open=stock_data['v']['open_price'],
-                high=stock_data['v']['high_price'],
-                low=stock_data['v']['low_price'],
-                close=stock_data['v']['lp'],
-                stock=stock
-            )
-            if stock_id is not None:
-                historical_data.stock_id = stock_id
-            data.append(historical_data)
-            self.session.add(historical_data)
+    def message_handler(self, message):
+        print("message: ", message)
+        ltp = message.get('ltp')
+        symbol = message.get('symbol')
+
+        # Retrieve the stock_id based on the symbol
+        stock = self.session.query(Stock).filter_by(symbol=symbol).first()
+        if stock is None:
+            print(f"Stock with symbol {symbol} not found in the database.")
+            return
+
+        current_datetime = datetime.datetime.now(self.timezone)  # Get the current date and time
+
+        # Format the time to hh:mm:ss format
+        formatted_time = current_datetime.strftime('%H:%M:%S')
+
+        # Create an instance of HistoricalData and commit to the database
+        historical_data = HistoricalData(
+            date=current_datetime.date(),
+            time=formatted_time,
+            stock_id=stock.id,
+            open=message.get('open_price', ltp),  # Use open_price if available, otherwise ltp
+            high=message.get('high_price', ltp),  # Use high_price if available, otherwise ltp
+            low=message.get('low_price', ltp),    # Use low_price if available, otherwise ltp
+            close=message.get('ltp'),
+            volume=message.get('vol_traded_today', 0)
+        )
+
+        # Add the historical_data instance to the session and commit
+        self.session.add(historical_data)
         self.session.commit()
-        return data
 
-    def create_historical_data_continuous(self, interval_sec):
-        while True:
-            symbols = [s.symbol for s in self.session.query(Stock)]
-            for symbol in symbols:
-                data = self.create_historical_data(symbol)
-                logger.info(f"Inserted {len(data)} rows into the historical_data table for {symbol}")
-            time.sleep(interval_sec)
-
-    # The below method is intended to be used to fetch data from the historical_data table.
-    # Example: The ML algorithms methods can fetch data from historical table for testing    
-    # def get_historical_data(self, symbol):
-    #     data = self.session.query(HistoricalData).filter_by(stock_id=symbol).all()
-    #     return data
-
-    def get_historical_data(self, symbol, start_time, end_time):
-        data = self.session.query(HistoricalData).filter(
-            HistoricalData.stock_id == symbol,
-            HistoricalData.date.between(start_time, end_time)
-        ).all()
-        df = pd.DataFrame([d.__dict__ for d in data])
-        df = df.drop('_sa_instance_state', axis=1)
-        return df
+        print("Committed historical data:", historical_data)
 
 
+# to be tested... for creating a backend of watchlist API
+# import threading
+# import time
+# from fastapi import FastAPI, WebSocket
 
+# app = FastAPI()
 
-    
+# class RealTimeDataUpdater:
+#     def __init__(self, equity_data_instance, symbols):
+#         self.equity_data = equity_data_instance
+#         self.symbols = symbols
+#         self.stop_flag = threading.Event()
+#         self.update_thread = threading.Thread(target=self._update_ltp_real_time)
 
+#     def start(self):
+#         self.update_thread.start()
+
+#     def stop(self):
+#         self.stop_flag.set()
+#         self.update_thread.join()
+
+#     def _update_ltp_real_time(self):
+#         self.equity_data.fs.subscribe(symbol=self.symbols)
+
+#         while not self.stop_flag.is_set():
+#             msg = self.equity_data.fs.get_message()
+
+#             if msg:
+#                 symbol = msg[0]['symbol']
+#                 ltp = msg[0]['ltp']
+
+#                 self.send_ltp_to_clients(symbol, ltp)
+
+#     def send_ltp_to_clients(self, symbol, ltp):
+#         active_connections = app.state.user_connections.get(self.symbols, set())
+
+#         for connection in active_connections:
+#             connection.send_text(f"Symbol: {symbol}, LTP: {ltp}")
+
+# @app.websocket("/{user_id}/ws")
+# async def websocket_endpoint(user_id: int, websocket: WebSocket):
+#     await websocket.accept()
+
+#     # Get or create a RealTimeDataUpdater instance for this user
+#     symbols = get_symbols_for_user(user_id)
+#     if symbols not in app.state.user_connections:
+#         app.state.user_connections[symbols] = set()
+
+#     app.state.user_connections[symbols].add(websocket)
+
+#     try:
+#         # Keep the WebSocket connection open until the client disconnects
+#         while True:
+#             data = await websocket.receive_text()
+#             print(f"Received data from client: {data}")
+#     except Exception as e:
+#         print(f"WebSocket error: {e}")
+#     finally:
+#         app.state.user_connections[symbols].remove(websocket)
+
+# # Function to get symbols for a user (you need to implement this based on your user data)
+# def get_symbols_for_user(user_id):
+#     # Implement this function to fetch symbols for the user from your database or any other source
+#     # For simplicity, I am returning some dummy symbols here
+#     return ['NSE:HDFCBANK-EQ', 'NSE:ICICIGI-EQ', 'NSE:AUBANK-EQ']
+
+# app.state.user_connections = {}
