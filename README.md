@@ -1,38 +1,7 @@
-STOCK_SDK/
-├── postgres_stock_db/
-├── credentials.py
-├── config.py
-├── api/
-│   ├── __init__.py
-│   ├── api_client.py
-│   └── endpoints.py
-├── analysis/
-│   ├── __init__.py
-│   ├── analysis.py
-│   └── predictions/
-│       ├── __init__.py
-│       ├── algorithm1.py
-│       ├── algorithm2.py
-│       ├── algorithm3.py
-│       └── ...
-├── trading/
-│   ├── __init__.py
-│   └── trading.py
-├── database/
-│   ├── __init__.py
-│   ├── models.py
-│   ├── database.py
-│   └── crud.py
-├── utils/
-│   ├── __init__.py
-│   └── helpers.py
-├── task_scripts/
-│   ├── __init__.py
-│   └── populate_stocks.py
-├── main.py
-├── logger.py
-├── README.md
-└── requirements.txt
+STOCK_SDK tree:
+
+<img width="318" alt="Screenshot 2023-12-23 at 02 22 59" src="https://github.com/thepraveen19/stock_sdk/assets/42544315/cb9984c4-0d1b-4d3b-b56c-f0896f4e71bb">
+
 
 
 Stock Trading System
